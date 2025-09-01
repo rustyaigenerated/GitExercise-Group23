@@ -1,0 +1,65 @@
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+import smtplib
+
+app = Flask(__name__)
+app.secret_key = "your_secret_key"
+
+# Fake database (JSON/dict for now)
+users = {
+    "testuser": {"password": "1234", "email": "receiver@gmail.com"}
+}
+
+# function to send email
+def send_email(receiver_email):
+    sender_email = "yourgmail@gmail.com"
+    password = "yourapppassword"  # app password from Gmail
+
+    subject = "Login Notification"
+    body = "You just logged into MMU The Thrift Exchange. If this wasn’t you, please secure your account."
+
+    message = f"Subject: {subject}\n\n{body}"
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message)
+        print("✅ Email sent successfully!")
+    except smtplib.SMTPAuthenticationError:
+        print("❌ Wrong email or password. Please try again.")
+    finally:
+        server.quit()
+
+
+@app.route("/")
+def home():
+    return "Welcome to MMU The Thrift Exchange!"
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        if username in users and users[username]["password"] == password:
+            session["user"] = username
+            flash("Login successful!", "success")
+
+            # send notification email
+            send_email(users[username]["email"])
+
+            return redirect(url_for("home"))
+        else:
+            flash("Invalid username or password!", "danger")
+    return '''
+        <form method="POST">
+            Username: <input type="text" name="username"><br>
+            Password: <input type="password" name="password"><br>
+            <input type="submit" value="Login">
+        </form>
+    '''
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
