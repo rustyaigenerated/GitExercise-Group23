@@ -1,80 +1,43 @@
-from flask import Flask, render_template, request
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import asc, desc
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Thrift Exchange Listings</title>
+</head>
+<body>
+    <h1>Listings</h1>
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///listings.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+    <!-- Search + Filter Form -->
+    <form>
+        <input type="text" placeholder="Search...">
 
-# ------------------ MODEL ------------------
-class Listing(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150), nullable=False)
-    category = db.Column(db.String(50), nullable=False)
-    price = db.Column(db.Float, nullable=False)
+        <select>
+            <option>All Categories</option>
+            <option>Clothes</option>
+            <option>Shoes</option>
+            <option>Accessories</option>
+        </select>
 
-    def __repr__(self):
-        return f"<Listing {self.title} - {self.category} - RM{self.price}>"
+        <select>
+            <option>Price (Low → High)</option>
+            <option>Price (High → Low)</option>
+            <option>Title (A → Z)</option>
+            <option>Title (Z → A)</option>
+        </select>
 
-# ------------------ ROUTE ------------------
-@app.route('/listings')
-def listings():
-    # --- Get Query Params ---
-    search = request.args.get('search', '')
-    category = request.args.get('category', '')
-    sort_by = request.args.get('sort_by', 'price')   # default sort
-    order = request.args.get('order', 'asc')
-    page = request.args.get('page', 1, type=int)
-    per_page = 5  # items per page
+        <button type="submit">Apply</button>
+    </form>
 
-    # --- Base Query ---
-    query = Listing.query
+    <!-- Listings -->
+    <ul>
+        <li>Nike Air Shoes - Shoes - RM120</li>
+        <li>Adidas T-Shirt - Clothes - RM45</li>
+        <li>Leather Bag - Accessories - RM150</li>
+    </ul>
 
-    if search:
-        query = query.filter(Listing.title.ilike(f"%{search}%"))
-    if category:
-        query = query.filter_by(category=category)
-
-    # --- Sorting ---
-    if sort_by == "price":
-        query = query.order_by(asc(Listing.price) if order == 'asc' else desc(Listing.price))
-    elif sort_by == "title":
-        query = query.order_by(asc(Listing.title) if order == 'asc' else desc(Listing.title))
-
-    # --- Pagination ---
-    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-    items = pagination.items
-
-    return render_template('listings.html',
-                           listings=items,
-                           pagination=pagination,
-                           search=search,
-                           category=category,
-                           sort_by=sort_by,
-                           order=order)
-
-# ------------------ INIT DATABASE ------------------
-@app.before_first_request
-def create_tables():
-    db.create_all()
-
-    # Insert sample data if DB is empty
-    if Listing.query.count() == 0:
-        sample_data = [
-            Listing(title="Nike Air Shoes", category="Shoes", price=120),
-            Listing(title="Adidas T-Shirt", category="Clothes", price=45),
-            Listing(title="Leather Bag", category="Accessories", price=150),
-            Listing(title="Denim Jacket", category="Clothes", price=90),
-            Listing(title="Casual Sneakers", category="Shoes", price=80),
-            Listing(title="Silver Necklace", category="Accessories", price=200),
-            Listing(title="Formal Shirt", category="Clothes", price=60),
-            Listing(title="Running Shoes", category="Shoes", price=110),
-            Listing(title="Sunglasses", category="Accessories", price=75),
-        ]
-        db.session.bulk_save_objects(sample_data)
-        db.session.commit()
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    <!-- Pagination -->
+    <div>
+        <a href="#">Previous</a> | Page 1 of 5 | <a href="#">Next</a>
+    </div>
+</body>
+</html>
 
