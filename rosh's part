@@ -1,104 +1,53 @@
-from flask import Flask, request, redirect, url_for
-import smtplib
-
+from flask import Flask, request
 app = Flask(__name__)
 
 users = {}
 
-def send_email(to_email, subject, message):
-    try:
-        sender_email = "youremail@gmail.com"  # replace with your email
-        sender_password = "yourpassword"      # replace with your email password
-
-        # Create SMTP session
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(sender_email, sender_password)
-
-        # Message format
-        body = f"Subject: {subject}\n\n{message}"
-        server.sendmail(sender_email, to_email, body)
-        server.quit()
-        print("Email sent successfully!")
-    except Exception as e:
-        print("Error:", e)
-
-# ---------------- HOME PAGE ----------------
 @app.route("/")
-def home():
-    return """
-        <h2>Welcome to MMU Thrift Exchange</h2>
-        <p><a href='/register'>Register</a> | <a href='/login'>Login</a></p>
-    """
+def homepage ():
+    return "
+    <h1>Homepage</h1>
+    <p>Welcome to The Thrift Exchange where only satisfaction serves you! \nFirst off, tap sign up if you haven't registered for an account.</p>
+    <a href='/signup'>Sign Up</a><br>
+    <a href='/login'>Login</a>
+    "
 
-# ---------------- REGISTER ----------------
-@app.route("/register", methods=["GET", "POST"])
-def register():
+@app.route("/signup", methods= ("GET", "POST"))
+def sign_up(email, password):
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        email = request.form["email"]
+    email = request.form("email")
+    password = request.form("pasword")
 
-        if username in users:
-            return "Username already exists! Try another one."
+    if email in users :
+       return "Email already exist, try logging in instead :) \n
+              <a href= "/signup"> Try again</a>"
+    else :
+       users(email) = password
+       return " Signed up operation is succesful, well done.
+               <a href= "/login"><Click to login here</a>
 
-        # Save user
-        users[username] = {"password": password, "email": email}
-
-        # Send email
-        send_email(email, "MMU Thrift Exchange - Account Created",
-                   f"Hi {username}, your account has been created successfully!")
-
-        return redirect(url_for("login"))
-
-    return """
-        <h2>Register</h2>
-        <form method="post">
-            Username: <input type="text" name="username"><br>
-            Password: <input type="password" name="password"><br>
-            Email: <input type="email" name="email"><br>
-            <input type="submit" value="Register">
-        </form>
-    """
-
-# ---------------- LOGIN ----------------
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login", methods=("GET", "POST"))
 def login():
     if request.method == "POST":
-        username = request.form["username"]
+        email = request.form["email"]
         password = request.form["password"]
 
-        if username in users and users[username]["password"] == password:
-            # Send login notification
-            send_email(users[username]["email"],
-                       "MMU Thrift Exchange - Login Alert",
-                       f"Hi {username}, you just logged into MMU Thrift Exchange. If this wasn’t you, please secure your account.")
+        if email in users and users[email] == password:
+            session["email"] = email
+            return .......
+        else: 
+             return " You have entered a wrong password, try again.
+                    <a href='/login'>Try again</a>"
 
-            return redirect(url_for("welcome", username=username))
-        else:
-            return "Invalid username or password. Try again."
 
-    return """
-        <h2>Login</h2>
-        <form method="post">
-            Username: <input type="text" name="username"><br>
-            Password: <input type="password" name="password"><br>
-            <input type="submit" value="Login">
-        </form>
-    """
 
-# ---------------- WELCOME ----------------
-@app.route("/welcome/<username>")
-def welcome(username):
-    return f"""
-        <h2>Welcome, {username}!</h2>
-        <p>You are now logged in.</p>
-        <form action="/" method="get">
-            <button type="submit">Back to Homepage</button>
-        </form>
-    """
 
-# Run app
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__=='__main__':
+   app.run(debug = True)
+
+
+
+
+
+
 
