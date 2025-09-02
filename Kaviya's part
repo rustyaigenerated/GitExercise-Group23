@@ -1,35 +1,80 @@
-<!-- templates/search_results.html -->
-{% extends "base.html" %}
+from flask import Flask, render_template, request
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import asc, desc
 
-{% block content %}
-<h1 class="mb-4">Search Results</h1>
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///listings.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-{% if listings %}
-  <div class="row">
-    {% for item in listings %}
-      <div class="col-md-4 mb-3">
-        <div class="card h-100">
-          <img src="{{ item.photos[0] }}" class="card-img-top" alt="{{ item.item_name }}">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">{{ item.item_name }}</h5>
-            <p class="card-text mb-1">
-              <strong>Category:</strong> {{ item.category }}<br>
-              <strong>Size:</strong> {{ item.size }}<br>
-              <strong>Brand:</strong> {{ item.brand }}<br>
-              <strong>Condition:</strong> {{ item.condition }}<br>
-              <strong>Price:</strong> ${{ item.price }}<br>
-              <strong>Status:</strong> {{ item.status }}
-            </p>
-            <a href="#" class="btn btn-primary mt-auto">View Details</a>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-{% else %}
-  <p>No listings found matching your criteria.</p>
-{% endif %}
+# ------------------ MODEL ------------------
+class Listing(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    price = db.Column(db.Float, nullable=False)
 
-<a href="/" class="btn btn-secondary mt-3">Back to Search</a>
-{% endblock %}
+    def __repr__(self):
+        return f"<Listing {self.title} - {self.category} - RM{self.price}>"
+
+# ------------------ ROUTE ------------------
+@app.route('/listings')
+def listings():
+    # --- Get Query Params ---
+    search = request.args.get('search', '')
+    category = request.args.get('category', '')
+    sort_by = request.args.get('sort_by', 'price')   # default sort
+    order = request.args.get('order', 'asc')
+    page = request.args.get('page', 1, type=int)
+    per_page = 5  # items per page
+
+    # --- Base Query ---
+    query = Listing.query
+
+    if search:
+        query = query.filter(Listing.title.ilike(f"%{search}%"))
+    if category:
+        query = query.filter_by(category=category)
+
+    # --- Sorting ---
+    if sort_by == "price":
+        query = query.order_by(asc(Listing.price) if order == 'asc' else desc(Listing.price))
+    elif sort_by == "title":
+        query = query.order_by(asc(Listing.title) if order == 'asc' else desc(Listing.title))
+
+    # --- Pagination ---
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    items = pagination.items
+
+    return render_template('listings.html',
+                           listings=items,
+                           pagination=pagination,
+                           search=search,
+                           category=category,
+                           sort_by=sort_by,
+                           order=order)
+
+# ------------------ INIT DATABASE ------------------
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
+    # Insert sample data if DB is empty
+    if Listing.query.count() == 0:
+        sample_data = [
+            Listing(title="Nike Air Shoes", category="Shoes", price=120),
+            Listing(title="Adidas T-Shirt", category="Clothes", price=45),
+            Listing(title="Leather Bag", category="Accessories", price=150),
+            Listing(title="Denim Jacket", category="Clothes", price=90),
+            Listing(title="Casual Sneakers", category="Shoes", price=80),
+            Listing(title="Silver Necklace", category="Accessories", price=200),
+            Listing(title="Formal Shirt", category="Clothes", price=60),
+            Listing(title="Running Shoes", category="Shoes", price=110),
+            Listing(title="Sunglasses", category="Accessories", price=75),
+        ]
+        db.session.bulk_save_objects(sample_data)
+        db.session.commit()
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
