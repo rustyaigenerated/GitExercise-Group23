@@ -1,22 +1,26 @@
-<h2>Search Results</h2>
+<!-- templates/search_results.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Search Results</h1>
 
 {% if listings %}
   <div class="row">
     {% for item in listings %}
       <div class="col-md-4 mb-3">
-        <div class="card">
+        <div class="card h-100">
           <img src="{{ item.photos[0] }}" class="card-img-top" alt="{{ item.item_name }}">
-          <div class="card-body">
+          <div class="card-body d-flex flex-column">
             <h5 class="card-title">{{ item.item_name }}</h5>
-            <p class="card-text">
-              Category: {{ item.category }}<br>
-              Size: {{ item.size }}<br>
-              Brand: {{ item.brand }}<br>
-              Condition: {{ item.condition }}<br>
-              Price: ${{ item.price }}<br>
-              Status: {{ item.status }}
+            <p class="card-text mb-1">
+              <strong>Category:</strong> {{ item.category }}<br>
+              <strong>Size:</strong> {{ item.size }}<br>
+              <strong>Brand:</strong> {{ item.brand }}<br>
+              <strong>Condition:</strong> {{ item.condition }}<br>
+              <strong>Price:</strong> ${{ item.price }}<br>
+              <strong>Status:</strong> {{ item.status }}
             </p>
-            <a href="/listing/{{ item.id }}" class="btn btn-primary">View Details</a>
+            <a href="#" class="btn btn-primary mt-auto">View Details</a>
           </div>
         </div>
       </div>
@@ -25,4 +29,7 @@
 {% else %}
   <p>No listings found matching your criteria.</p>
 {% endif %}
+
+<a href="/" class="btn btn-secondary mt-3">Back to Search</a>
+{% endblock %}
 
