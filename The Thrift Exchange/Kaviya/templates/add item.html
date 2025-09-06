@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add New Item</title>
+</head>
+<body>
+    <h1>Add New Item</h1>
+    <form method="post" enctype="multipart/form-data">
+        <label>Item Name:</label><br>
+        <input type="text" name="name" required><br><br>
+
+        <label>Category:</label><br>
+        <select name="category" required>
+            <option value="">-- Select Category --</option>
+            <option value="Shoes">Shoes</option>
+            <option value="Clothes">Clothes</option>
+            <option value="Accessories">Accessories</option>
+        </select><br><br>
+
+        <label>Price (RM):</label><br>
+        <input type="number" name="price" step="0.01" required><br><br>
+
+        <label>Description:</label><br>
+        <textarea name="description" required></textarea><br><br>
+
+        <label>Photo (choose from gallery):</label><br>
+        <input type="file" name="photo" accept="image/*"><br><br>
+
+        <button type="submit">Add Item</button>
+    </form>
+
+    <br>
+    <a href="/listings">Back to Listings</a>
+</body>
+</html>
+
+
