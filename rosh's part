@@ -1,11 +1,29 @@
 from flask import Flask, request
+import json
+impost os
+
 app = Flask(__name__)
+app.secret.key = "psps122triple3andthreenine"
 
-users = {}
 
+def load_users():
+    if not os.path.exists("users.json"):
+        name_file = open("users.json", "w")
+        json.dump({}, name_file)
+        name_file.close()
+    name_file = open("users.json", "r")
+    users = json.load(name_file)
+    name_file.close()
+    return users
+
+def save_users(users):
+    name_file = open("users.json", "w")
+    json.dump(users, name_file)
+    name_file.close()
+   
 @app.route("/")
 def homepage ():
-    return "
+    return """
     <h1>Homepage</h1>
     <p>Welcome to The Thrift Exchange where only satisfaction serves you! \nFirst off, tap sign up if you haven't registered for an account.</p>
     <a href='/signup'>Sign Up</a><br>
