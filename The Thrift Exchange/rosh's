@@ -24,6 +24,18 @@ def save_users(users):
 @app.route("/")
 def homepage ():
     return """
+    <html>
+    <head>
+      <title> The thrift Exchange </title>
+      <link rel="stylesheet" href
+
+
+
+
+
+
+
+    return """
     <h1>Homepage</h1>
     <p>Welcome to The Thrift Exchange where only satisfaction serves you! \nFirst off, tap sign up if you haven't registered for an account.</p>
     <a href='/signup'>Sign Up</a><br>
