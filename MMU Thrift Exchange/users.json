@@ -1,0 +1,54 @@
+{
+    "roshinyymalar.15@gmail.com": {
+        "password": "1234qqq",
+        "phone": "017aaaaaaa",
+        "verified": true,
+        "profile": {
+            "first_name": "roshini",
+            "last_name": "malar",
+            "age": "20",
+            "gender": "Female",
+            "faculty": "FCI",
+            "phone": "60172001966",
+            "account_type": "buyer",
+            "profile_pic": "Female.png"
+        },
+        "cart": {
+            "8da3a981": 1
+        }
+    },
+    "roshinyy_malar@yahoo.com": {
+        "password": "1234qqq",
+        "phone": "60172001966",
+        "verified": true,
+        "profile": {
+            "first_name": "THE",
+            "last_name": "ADMIN",
+            "age": "20",
+            "gender": "Female",
+            "faculty": "FCI",
+            "phone": "60172001966",
+            "account_type": "admin",
+            "profile_pic": "Female.png"
+        },
+        "cart": {
+            "7d343771": 1
+        }
+    },
+    "kaviyashininanban@gmail.com": {
+        "password": "1234qqq",
+        "phone": "01128192977",
+        "verified": true,
+        "profile": {
+            "first_name": "Kaviyashini",
+            "last_name": "Nanban",
+            "age": "19",
+            "gender": "Female",
+            "faculty": "FCI",
+            "phone": "601128192977",
+            "account_type": "buyer",
+            "profile_pic": "Female.png"
+        },
+        "cart": {}
+    }
+}
