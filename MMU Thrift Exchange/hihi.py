@@ -648,6 +648,56 @@ def admin_update_order(order_id, status):
     return redirect(url_for("admin_dashboard"))
 
 
+@app.route("/transactions")
+def transactions():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    email = session["user"]
+    users = load_users()
+    orders = load_orders()
+    items = load_items()
+
+    def get_name(email):
+        profile = users.get(email, {}).get("profile", {})
+        full_name = f"{profile.get('first_name','')} {profile.get('last_name','')}".strip()
+        return full_name if full_name else email
+
+    my_orders = []
+    for oid, order in orders.items():
+        if email == order["buyer"] or email in order.get("sellers", []):
+            cart_details = []
+            for iid, qty in order.get("cart", {}).items():
+                item = items.get(iid)
+                if item:
+                    cart_details.append(f"{item['item_code']} - {item['name']} (x{qty})")
+                else:
+                    cart_details.append(f"[Deleted Item {iid}] (x{qty})")
+
+            order_info = {
+                "id": oid,
+                "buyer": get_name(order["buyer"]),
+                "cart": cart_details,
+                "status": order["status"],
+                "delivery": order["delivery"],
+                "payment": order["payment"],
+                "address": order["address"],
+                "buyer_confirmed": order.get("buyer_confirmed", False),
+                "seller_confirmed": order.get("seller_confirmed", False),
+                "sellers": [get_name(s) for s in order.get("sellers", [])]
+            }
+
+            if email == order["buyer"]:
+                order_info["contact"] = [users[s]["phone"] for s in order["sellers"] if s in users]
+            else:
+                order_info["contact"] = [users[order["buyer"]]["phone"]] if order["buyer"] in users else []
+
+            my_orders.append(order_info)
+
+    return render_template("transactions.html", transactions=my_orders)
+
+
+
 
 
 
