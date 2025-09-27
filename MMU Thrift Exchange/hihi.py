@@ -697,6 +697,144 @@ def transactions():
     return render_template("transactions.html", transactions=my_orders)
 
 
+@app.route("/start_chat/<seller_email>")
+def start_chat(seller_email):
+    buyer_email = session["user"]
+
+    chat_id = create_chat(buyer_email, seller_email)
+
+    return redirect(url_for("chat", chat_id=chat_id))
+
+
+@app.route("/chat/<chat_id>", methods=["GET", "POST"])
+def chat(chat_id):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    user = session["user"]
+    users = load_users()
+    chats = load_chats()
+
+    if chat_id not in chats:
+        flash("Chat not found", "error")
+        return redirect(url_for("inbox"))
+
+    chat_data = chats[chat_id]
+
+    if session.get("role") == "admin":
+        chat_data["unread_for_admin"] = False
+    else:
+        if "unread_for" not in chat_data:
+            chat_data["unread_for"] = {}
+        chat_data["unread_for"][user] = False
+
+    save_chats(chats) 
+
+    def get_name(email):
+        profile = users.get(email, {}).get("profile", {})
+        full_name = f"{profile.get('first_name','')} {profile.get('last_name','')}".strip()
+        return full_name if full_name else email
+
+    buyer_name = get_name(chat_data["buyer"])
+    seller_name = get_name(chat_data["seller"])
+
+    if request.method == "POST":
+        message = request.form["message"]
+        add_chat_message(chat_id, user, message)
+        return redirect(url_for("chat", chat_id=chat_id))
+
+    return render_template(
+        "messages.html",
+        chat=chat_data,
+        chat_id=chat_id,
+        user=user,
+        buyer_name=buyer_name,
+        seller_name=seller_name,
+        get_name=get_name  
+    )
+
+
+@app.route("/report/<chat_id>", methods=["POST"])
+def report(chat_id):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    reason = request.form.get("reason")
+    chats = load_chats()
+
+    if chat_id in chats:
+        chats[chat_id]["reported"] = True
+        chats[chat_id].setdefault("messages", []).append({
+            "sender": "SYSTEM",
+            "text": f"Conversation reported: {reason}",
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M") 
+        })
+        chats[chat_id]["unread_for_admin"] = True  
+        save_chats(chats)
+
+    flash("Conversation reported to admin.", "warning")
+    return redirect(url_for("chat", chat_id=chat_id))
+
+
+@app.route("/admin_chat/<chat_id>", methods=["POST"])
+def admin_chat(chat_id):
+    if "user" not in session or not session.get("is_admin", False):
+        return redirect(url_for("login"))
+
+    chats = load_chats()
+    if chat_id not in chats:
+        return redirect(url_for("items"))
+
+    msg = request.form["message"]
+    if msg.strip():
+        chats[chat_id]["messages"].append({
+            "sender": "ADMIN",
+            "text": msg,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        })
+        save_chats(chats)
+    return redirect(url_for("chat", chat_id=chat_id))
+
+
+@app.route("/inbox")
+def inbox():
+    if "user" not in session:
+        return redirect(url_for("login")) 
+
+    email = session["user"]
+    role = session.get("role")
+
+    chats = load_chats()
+    users = load_users()
+    conversations = []
+
+    for cid, chat in chats.items():
+        if role == "admin":
+
+            if chat.get("reported", False):
+                conversations.append({
+                    "chat_id": cid,
+                    "other_user": get_name(chat["seller"]),
+                    "last_message": chat["messages"][-1]["text"] if chat["messages"] else "",
+                    "timestamp": chat["messages"][-1]["timestamp"] if chat["messages"] else "",
+                    "unread": chat.get("unread_for_admin", False)
+                })
+        else:
+            if email in [chat["buyer"], chat["seller"]]:
+                other_email = chat["seller"] if email == chat["buyer"] else chat["buyer"]
+                conversations.append({
+                    "chat_id": cid,
+                    "other_user": get_name(other_email),
+                    "last_message": chat["messages"][-1]["text"] if chat["messages"] else "",
+                    "timestamp": chat["messages"][-1]["timestamp"] if chat["messages"] else "",
+                    "unread": chat.get("unread_for", {}).get(email, False)
+                })
+
+    return render_template("inbox.html", conversations=conversations)
+
+
+
 
 
 
