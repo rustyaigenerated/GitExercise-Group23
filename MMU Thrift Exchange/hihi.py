@@ -124,6 +124,41 @@ def add_chat_message(chat_id, sender, text):
     return True
 
 
+def load_transactions():
+    try:
+        with open("transactions.json", "r") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_transactions(transactions):
+    with open("transactions.json", "w") as f:
+        json.dump(transactions, f, indent=4)
+
+
+def send_item_status_email(to_email, item_name, status):
+    msg = MIMEText(f"Your item '{item_name}' has been {status} by the admin.")
+    msg["Subject"] = f"Item {status.capitalize()} - MMU Thrift Exchange"
+    msg["From"] = SMTP_EMAIL
+    msg["To"] = to_email
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server: 
+            server.starttls()
+            server.login(SMTP_EMAIL, SMTP_PASS)
+            server.sendmail(SMTP_EMAIL, to_email, msg.as_string())
+        return True
+    except Exception as e:
+        print("Email sending error:", e)
+        return False
+
+def get_name(email):
+    users = load_users()
+    profile = users.get(email, {}).get("profile", {})
+    full_name = f"{profile.get('first_name','')} {profile.get('last_name','')}".strip()
+    return full_name if full_name else email
+
+
 
 
 
