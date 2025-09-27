@@ -1,1 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Profile - MMU Thrift Exchange</title> 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h1 class="mb-4">My Profile</h1>
+
+    <!-- Role-based navigation -->
+    <nav class="mb-3">
+      {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary btn-sm">Admin Dashboard</a> 
+        <a href="{{ url_for('admin_items') }}" class="btn btn-outline-primary btn-sm">Review Items</a> 
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-primary btn-sm">Logout</a>
+      
+      {% elif session.get('role') == 'buyer' %}
+        <a href="{{ url_for('items') }}" class="btn btn-outline-primary btn-sm">Browse Items</a> 
+        <a href="{{ url_for('cart') }}" class="btn btn-outline-primary btn-sm">My Cart</a> 
+        <a href="{{ url_for('inbox') }}" class="btn btn-outline-primary btn-sm">Messages</a>
+        <a href="{{ url_for('transactions') }}" class="btn btn-outline-primary btn-sm">Transactions</a> 
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-primary btn-sm">Logout</a>
+
+      {% elif session.get('role') == 'seller' %}
+        <a href="{{ url_for('items') }}" class="btn btn-outline-primary btn-sm">My Items</a> 
+        <a href="{{ url_for('upload_item') }}" class="btn btn-outline-primary btn-sm">Upload Item</a>
+        <a href="{{ url_for('inbox') }}" class="btn btn-outline-primary btn-sm">Messages</a> 
+        <a href="{{ url_for('transactions') }}" class="btn btn-outline-primary btn-sm">Transactions</a> 
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-primary btn-sm">Logout</a>
+      {% endif %}
+    </nav>
+
+    {% if edit_mode %}
+      <form method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm">
+        <div class="text-center mb-3">
+          <img src="{{ url_for('static', filename='profile_pics/' ~ profile.get('profile_pic','example.jpg')) }}" 
+               class="rounded-circle img-thumbnail" 
+               style="width: 120px; height: 120px; object-fit: cover;"
+               alt="Profile Picture">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">First Name</label>
+          <input type="text" name="first_name" class="form-control" value="{{ profile.get('first_name','') }}" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Last Name</label>
+          <input type="text" name="last_name" class="form-control" value="{{ profile.get('last_name','') }}" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Age</label>
+          <select name="age" class="form-select" required>
+            <option value="" disabled {% if not profile.get('age') %}selected{% endif %}>Select</option> 
+            {% for a in range(16, 30) %}
+              <option value="{{ a }}" {% if profile.get('age') == a|string %}selected{% endif %}>{{ a }}</option>
+            {% endfor %} 
+            <option value="≥30" {% if profile.get('age') == '≥30' %}selected{% endif %}>≥30</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Gender</label>
+          <select name="gender" class="form-select" required>
+            <option value="" disabled {% if not profile.get('gender') %}selected{% endif %}>Select</option>
+            <option value="Male" {% if profile.get('gender') == 'Male' %}selected{% endif %}>Male</option>
+            <option value="Female" {% if profile.get('gender') == 'Female' %}selected{% endif %}>Female</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Faculty</label>
+          <select name="faculty" class="form-select" required>
+            <option value="" disabled {% if not profile.get('faculty') %}selected{% endif %}>Select</option>
+            <option value="FAC" {% if profile.get('faculty') == 'FAC' %}selected{% endif %}>FAC</option>
+            <option value="FAIE" {% if profile.get('faculty') == 'FAIE' %}selected{% endif %}>FAIE</option> 
+            <option value="FCA" {% if profile.get('faculty') == 'FCA' %}selected{% endif %}>FCA</option>
+            <option value="FCI" {% if profile.get('faculty') == 'FCI' %}selected{% endif %}>FCI</option>
+            <option value="FCM" {% if profile.get('faculty') == 'FCM' %}selected{% endif %}>FCM</option>
+            <option value="FOM" {% if profile.get('faculty') == 'FOM' %}selected{% endif %}>FOM</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Phone</label>
+          <input type="tel" name="phone" class="form-control" pattern="60[0-9]{8,10}" placeholder="60123456789"
+                 value="{{ profile.get('phone','') }}" required>
+        </div>
+
+        {% if is_admin %}
+          <p><b>Account Type:</b> Admin (fixed)</p>
+        {% else %}
+          <div class="mb-3">
+            <label class="form-label">Account Type</label>
+            <select name="account_type" class="form-select" required>
+              <option value="buyer" {% if profile.get('account_type') == 'buyer' %}selected{% endif %}>Buyer</option>
+              <option value="seller" {% if profile.get('account_type') == 'seller' %}selected{% endif %}>Seller</option>
+            </select>
+          </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-success w-100">Save Profile</button>
+      </form>
+
+    {% else %}
+      <div class="card p-4 shadow-sm">
+        <div class="text-center mb-3">
+          <img src="{{ url_for('static', filename='profile_pics/' ~ profile.get('profile_pic','example.jpg')) }}" 
+               class="rounded-circle img-thumbnail" 
+               style="width: 120px; height: 120px; object-fit: cover;"
+               alt="Profile Picture">
+        </div>
+        <p><b>Name:</b> {{ profile.get('first_name','') }} {{ profile.get('last_name','') }}</p>
+        <p><b>Age:</b> {{ profile.get('age','') }}</p>
+        <p><b>Gender:</b> {{ profile.get('gender','') }}</p>
+        <p><b>Faculty:</b> {{ profile.get('faculty','') }}</p>
+        <p><b>Phone:</b> {{ profile.get('phone','') }}</p>
+        <p><b>Account Type:</b> {{ session.get('role','User')|capitalize }}</p>
+        <a href="{{ url_for('profile', edit=1) }}" class="btn btn-warning w-100">Edit Profile</a>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
 
