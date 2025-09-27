@@ -1,0 +1,90 @@
+{
+    "A001": {
+        "image": "WhatsApp_Image_2025-09-06_at_18.23.00_422468d0.jpg",
+        "name": "Hair Pin",
+        "seller": "kaviyashininanban@gmail.com",
+        "description": "Used twice, sanitised before given.",
+        "price": 2.0,
+        "status": "approved",
+        "category": "Accessories",
+        "item_code": "A001",
+        "upload_date": "Saturday, 27 September 2025"
+    },
+    "A002": {
+        "image": "WhatsApp_Image_2025-09-27_at_19.52.53_366a0ea5.jpg",
+        "name": "Watch",
+        "seller": "kaviyashininanban@gmail.com",
+        "description": "In good condition",
+        "price": 35.0,
+        "status": "approved",
+        "category": "Accessories",
+        "item_code": "A002",
+        "upload_date": "Saturday, 27 September 2025"
+    },
+    "C001": {
+        "image": "WhatsApp_Image_2025-09-27_at_20.02.13_4b55693e.jpg",
+        "name": "White textured floral top",
+        "seller": "kaviyashininanban@gmail.com",
+        "description": "Used once, nice material",
+        "price": 25.0,
+        "status": "sold",
+        "category": "Clothes",
+        "item_code": "C001",
+        "upload_date": "Saturday, 27 September 2025"
+    },
+    "C002": {
+        "image": "WhatsApp_Image_2025-09-27_at_20.02.13_26274b1b.jpg",
+        "name": "Olive green collared crop top",
+        "seller": "kaviyashininanban@gmail.com",
+        "description": "Size:XL",
+        "price": 15.0,
+        "status": "approved",
+        "category": "Clothes",
+        "item_code": "C002",
+        "upload_date": "Saturday, 27 September 2025"
+    },
+    "S001": {
+        "image": "WhatsApp_Image_2025-09-27_at_20.12.40_285bf129.jpg",
+        "name": "Black flat shoes ",
+        "seller": "kaviyashininanban@gmail.com",
+        "description": "Never used before, size: 43",
+        "price": 50.0,
+        "status": "approved",
+        "category": "Shoes",
+        "item_code": "S001",
+        "upload_date": "Saturday, 27 September 2025"
+    },
+    "S002": {
+        "image": "WhatsApp_Image_2025-09-27_at_20.12.13_457c6b10.jpg",
+        "name": "Casual Shoe",
+        "seller": "kaviyashininanban@gmail.com",
+        "description": "Grey colour ,Size 40",
+        "price": 30.0,
+        "status": "approved",
+        "category": "Shoes",
+        "item_code": "S002",
+        "upload_date": "Saturday, 27 September 2025"
+    },
+    "O001": {
+        "image": "WhatsApp_Image_2025-09-27_at_19.24.42_983bb7df.jpg",
+        "name": " CryBaby Pop Mart- What A Frog",
+        "seller": "kaviyashininanban@gmail.com",
+        "description": "In great condition, but box is opened. Completely new.",
+        "price": 40.0,
+        "status": "approved",
+        "category": "Others",
+        "item_code": "O001",
+        "upload_date": "Saturday, 27 September 2025"
+    },
+    "A003": {
+        "image": "WhatsApp_Image_2025-09-21_at_19.11.31_c7df5623.jpg",
+        "name": "Pin",
+        "seller": "kaviyashininanban@gmail.com",
+        "description": "never used",
+        "price": 2.0,
+        "status": "approved",
+        "category": "Accessories",
+        "item_code": "A003",
+        "upload_date": "Saturday, 27 September 2025"
+    }
+}
