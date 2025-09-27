@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+  <meta charset="UTF-8">
+  <title>Cart - MMU Thrift Exchange</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-4">
+    <h2 class="mb-4">Your Cart</h2>
+    <nav class="mb-3"> 
+        <a href="{{ url_for('profile') }}" class="btn btn-outline-primary btn-sm">Profile</a> 
+        <a href="{{ url_for('items') }}" class="btn btn-outline-primary btn-sm">Browse Items</a> 
+        <a href="{{ url_for('inbox') }}" class="btn btn-outline-primary btn-sm">Messages</a>
+        <a href="{{ url_for('transactions') }}" class="btn btn-outline-primary btn-sm">Transactions</a> 
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-primary btn-sm">Logout</a> 
+    </nav>
+
+    {% if cart_items %}
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Item</th>
+              <th>Price (RM)</th>
+              <th>Qty</th>
+              <th>Subtotal (RM)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in cart_items %}
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ "%.2f"|format(item.price) }}</td>
+              <td>{{ item.qty }}</td>
+              <td>{{ "%.2f"|format(item.price * item.qty) }}</td>
+              <td>
+                <a href="{{ url_for('remove_from_cart', item_id=item.id) }}" class="btn btn-danger btn-sm">Remove</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-between mt-3">
+        <h5>Total: RM {{ "%.2f"|format(total) }}</h5>
+        <a href="{{ url_for('checkout') }}" class="btn btn-success">Proceed to Checkout</a>
+      </div>
+    {% else %}
+      <div class="alert alert-info">Your cart is empty.</div>
+    {% endif %}
+  </div>
+</body>
+</html>
