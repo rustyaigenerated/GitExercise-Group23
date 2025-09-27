@@ -1,0 +1,17 @@
+{
+    "1": {
+        "buyer": "roshinyymalar.15@gmail.com",
+        "sellers": [
+            "kaviyashininanban@gmail.com"
+        ],
+        "cart": {
+            "ab12ba07": 1
+        },
+        "address": "hb4 wing c 408",
+        "delivery": "home",
+        "payment": "cash",
+        "status": "Completed",
+        "buyer_confirmed": true,
+        "seller_confirmed": true
+    }
+}
