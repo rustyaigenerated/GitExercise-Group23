@@ -1,1 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile - MMU Thrift Exchange</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('items') }}">MMU Thrift Exchange</a>
+      <div>
+        <a href="{{ url_for('items') }}" class="btn btn-outline-light btn-sm">Back to Items</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container text-center">
+    <img src="{{ url_for('static', filename='profile_pics/' ~ profile.profile_pic) }}" 
+         alt="Profile Picture"
+         class="rounded-circle img-thumbnail mb-3"
+         style="width: 150px; height: 150px; object-fit: cover;">
+
+    <h2>{{ profile.first_name }} {{ profile.last_name }}</h2>
+
+    <p><b>Age:</b> {{ profile.age }}</p>
+    <p><b>Gender:</b> {{ profile.gender }}</p>
+    <p><b>Faculty:</b> {{ profile.faculty }}</p>
+    <p><b>Phone:</b> {{ profile.phone }}</p>
+    <p><b>Account Type:</b> {{ profile.account_type }}</p>
+  </div>
+</body>
+</html>
 
