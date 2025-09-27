@@ -360,6 +360,294 @@ def upload_item():
     return render_template("upload_item.html")
 
 
+@app.route("/items")
+def items():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    email = session["user"]
+    users = load_users()
+    role = users[email].get("profile", {}).get("account_type", "buyer")
+    all_items = load_items() 
+
+    if role == "seller":
+        seller_items = {k: v for k, v in all_items.items() if v["seller"] == email}
+        return render_template("seller_items.html", items=seller_items, role="seller")
+    else:
+        approved_items = {k: v for k, v in all_items.items() if v["status"] == "approved"} 
+        category = request.args.get("category")
+        if category and category != "All":
+            approved_items = {k: v for k, v in approved_items.items() if v["category"] == category} 
+        for v in approved_items.values():
+            v["seller_name"] = get_name(v["seller"])
+        return render_template("buyer_items.html", items=approved_items, role="buyer")
+
+
+@app.route("/admin/items")
+def admin_items():
+    if session.get("email") not in ADMINS:
+        flash("Access denied")
+        return redirect(url_for("index"))
+    
+    items = load_items()
+    return render_template("admin_items.html", items=items)
+
+
+@app.route("/add_to_cart/<item_id>")
+def add_to_cart(item_id):
+    if "user" not in session:
+        flash("Login required to add items to cart", "error")
+        return redirect(url_for("login"))
+
+    email = session["user"]
+    users = load_users()
+    items = load_items()
+
+    if item_id not in items or items[item_id]["status"] != "approved":
+        flash("Item not available.", "error")
+        return redirect(url_for("items"))
+
+    if "cart" not in users[email]:
+        users[email]["cart"] = {}
+
+    if users[email]["cart"].get(item_id, 0) >= 1:
+        if not session.get("out_of_stock_flash", False):
+            flash("Item out of stock.", "error")
+            session["out_of_stock_flash"] = True
+        return redirect(url_for("items"))
+
+    users[email]["cart"][item_id] = 1
+    save_users(users)
+
+    flash("Item added to cart!", "success")
+    return redirect(url_for("items"))
+
+
+@app.route("/remove_from_cart/<item_id>")
+def remove_from_cart(item_id):
+    if "user" not in session:
+        flash("Login required.", "error")
+        return redirect(url_for("login"))
+
+    email = session["user"]
+    users = load_users()
+
+    if "cart" in users[email] and item_id in users[email]["cart"]:
+        if users[email]["cart"][item_id] > 1:
+            users[email]["cart"][item_id] -= 1
+        else:
+            del users[email]["cart"][item_id]
+
+        save_users(users)
+        flash("Item removed from cart.", "success")
+    else:
+        flash("Item not found in your cart.", "error")
+
+    return redirect(url_for("cart"))
+
+
+@app.route("/admin/approve/<item_id>")
+def approve_item(item_id):
+    items = load_items()
+    if item_id in items:
+        items[item_id]["status"] = "approved"
+        save_items(items)
+
+        # notify seller
+        send_item_status_email(items[item_id]["seller"], items[item_id]["name"], "approved")
+        flash(f"Item '{items[item_id]['name']}' approved and seller notified.", "success")
+    return redirect(url_for("admin_items"))
+
+
+@app.route("/admin/reject/<item_id>")
+def reject_item(item_id):
+    items = load_items()
+    if item_id in items:
+        seller_email = items[item_id]["seller"]
+        item_name = items[item_id]["name"]
+
+        # notify seller
+        send_item_status_email(seller_email, item_name, "rejected")
+
+        # delete item
+        del items[item_id]
+        save_items(items)
+        flash(f"Item '{item_name}' rejected and seller notified.", "danger")
+    return redirect(url_for("admin_items"))
+
+
+@app.route("/cart")
+def cart():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    email = session["user"]
+    users = load_users()
+    items = load_items()
+    cart_items = []
+    total_price = 0
+
+    if "cart" in users[email]:
+        for item_id, qty in users[email]["cart"].items():
+            if item_id in items:
+                item = items[item_id]
+                subtotal = item["price"] * qty
+                total_price += subtotal
+                cart_items.append({
+                    "id": item_id,
+                    "name": item["name"],
+                    "price": item["price"],
+                    "qty": qty,
+                    "subtotal": subtotal
+                })
+
+    return render_template("cart.html", cart_items=cart_items, total=total_price)
+
+@app.route("/checkout", methods=["GET", "POST"])
+def checkout():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    current_user = session["user"]
+    users = load_users() 
+    cart = users[current_user].get("cart", {})
+    
+    if not cart:
+        flash("Cart is empty.", "error")
+        return redirect(url_for("cart"))
+
+    if request.method == "POST":
+        address = request.form["address"]
+        delivery = request.form["delivery"]
+        payment = request.form["payment"]
+
+       
+        orders = load_orders()
+        order_id = str(len(orders) + 1)
+
+        items = load_items()
+        sellers = list({items[iid]["seller"] for iid in cart if iid in items})
+
+        orders[order_id] = {
+            "buyer": current_user,
+            "sellers": sellers,
+            "cart": {iid: qty for iid, qty in cart.items() if iid in items},  # only valid items
+            "address": address,
+            "delivery": delivery,
+            "payment": payment,
+            "status": "Pending",
+            "buyer_confirmed": False,
+            "seller_confirmed": False
+        }
+        save_orders(orders)
+
+        
+        users[current_user]["cart"] = {}
+        save_users(users)
+
+        flash("Order created. Contact seller(s) to proceed.", "success")
+        return redirect(url_for("transactions"))
+
+ 
+    return render_template("checkout.html")
+
+
+
+@app.route("/confirm_payment/<order_id>", methods=["POST"])
+def confirm_payment(order_id):
+    if "user" not in session:
+        flash("Please log in first.", "danger")
+        return redirect(url_for("login"))
+
+    user_email = session["user"]
+    orders = load_orders()
+
+    if order_id not in orders:
+        flash("Order not found.", "danger")
+        return redirect(url_for("transactions"))
+
+    order = orders[order_id]
+
+   
+    if user_email == order["buyer"] and not order.get("buyer_confirmed", False):
+        order["buyer_confirmed"] = True
+        flash("You have confirmed payment as Buyer.", "success")
+
+    
+    elif user_email in order.get("sellers", []) and not order.get("seller_confirmed", False):
+        order["seller_confirmed"] = True
+        flash("You have confirmed payment as Seller.", "success")
+
+    else:
+        flash("You have already confirmed or are not authorized.", "warning")
+
+    
+    if order.get("buyer_confirmed") and order.get("seller_confirmed"):
+        order["status"] = "Completed"
+        items = load_items()
+        for iid in order.get("cart", {}).keys():
+            if iid in items:
+                items[iid]["status"] = "sold"
+        save_items(items)
+        flash("Order completed. Items marked as sold.", "success")
+
+    with open("orders.json", "w") as f:
+        json.dump(orders, f, indent=4)
+
+    return redirect(url_for("transactions"))
+
+
+@app.route("/admin/dashboard")
+def admin_dashboard():
+    if "user" not in session or not session.get("is_admin", False):
+        return redirect(url_for("login"))
+
+    items = load_items()
+    orders = load_orders()
+    users = load_users()
+
+    order_list = []
+    for oid, order in orders.items():
+        buyer_profile = users.get(order["buyer"], {}).get("profile", {})
+        buyer_name = f"{buyer_profile.get('first_name','')} {buyer_profile.get('last_name','')}".strip() or order["buyer"]
+        buyer_phone = users.get(order["buyer"], {}).get("phone", "N/A")
+
+        cart_details = []
+        for iid, qty in order.get("cart", {}).items():
+            item = items.get(iid)
+            if item:
+                cart_details.append(f"{item['name']} (x{qty})")
+            else:
+                cart_details.append(f"[Deleted Item {iid}] (x{qty})")
+
+        order_list.append({
+            "id": oid,
+            "buyer": buyer_name,
+            "buyer_phone": buyer_phone,
+            "items": cart_details,
+            "status": order["status"],
+            "delivery": order["delivery"],
+            "payment": order["payment"],
+            "address": order["address"],
+        })
+
+    return render_template("admin_dashboard.html", items=items, orders=order_list)
+
+
+
+@app.route("/admin/update_order/<order_id>/<status>")
+def admin_update_order(order_id, status):
+    if "user" not in session or not session.get("is_admin", False):
+        return redirect(url_for("login"))
+
+    orders = load_orders()
+    if order_id in orders:
+        orders[order_id]["status"] = status
+        save_orders(orders) 
+
+    return redirect(url_for("admin_dashboard"))
+
+
 
 
 
