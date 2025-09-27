@@ -1,0 +1,64 @@
+{
+    "1": {
+        "buyer": "roshinyymalar.15@gmail.com",
+        "seller": "kaviyashininanban@gmail.com",
+        "messages": [
+            {
+                "sender": "roshinyymalar.15@gmail.com",
+                "text": "hi, what is the size of this shoe?",
+                "timestamp": "2025-09-21 21:50"
+            },
+            {
+                "sender": "kaviyashininanban@gmail.com",
+                "text": "hi",
+                "timestamp": "2025-09-21 22:01"
+            },
+            {
+                "sender": "kaviyashininanban@gmail.com",
+                "text": "the shoe size is 36 EU",
+                "timestamp": "2025-09-21 22:03"
+            },
+            {
+                "sender": "roshinyymalar.15@gmail.com",
+                "text": "alright, thank u!",
+                "timestamp": "2025-09-22 01:51"
+            },
+            {
+                "sender": "SYSTEM",
+                "text": "Conversation reported: Seller is unresponsive",
+                "timestamp": "2025-09-22 01:59"
+            },
+            {
+                "sender": "kaviyashininanban@gmail.com",
+                "text": "im sorry, how may i help u to ease your shopping time?",
+                "timestamp": "2025-09-22 03:58"
+            },
+            {
+                "sender": "roshinyymalar.15@gmail.com",
+                "text": "im good, i accidentally reported you, my bad",
+                "timestamp": "2025-09-22 03:59"
+            },
+            {
+                "sender": "roshinyymalar.15@gmail.com",
+                "text": "\ud83d\ude05",
+                "timestamp": "2025-09-22 04:00"
+            },
+            {
+                "sender": "roshinyymalar.15@gmail.com",
+                "text": "hi",
+                "timestamp": "2025-09-23 15:19"
+            },
+            {
+                "sender": "roshinyy_malar@yahoo.com",
+                "text": "ll",
+                "timestamp": "2025-09-23 15:29"
+            }
+        ],
+        "unread_for": {
+            "roshinyymalar.15@gmail.com": false,
+            "kaviyashininanban@gmail.com": false
+        },
+        "reported": true,
+        "unread_for_admin": false
+    }
+}
