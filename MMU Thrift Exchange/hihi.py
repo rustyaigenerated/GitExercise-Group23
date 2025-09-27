@@ -831,7 +831,17 @@ def inbox():
                     "unread": chat.get("unread_for", {}).get(email, False)
                 })
 
-    return render_template("inbox.html", conversations=conversations)
+    return render_template("inbox.html", conversations=conversations) 
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("index"))
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
 
 
 
