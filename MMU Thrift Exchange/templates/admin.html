@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Approve Items</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Pending Items</h2>
+    <div class="list-group">
+      {% for id, item in items.items() %}
+      <div class="list-group-item mb-3 shadow-sm">
+        <h5>{{ item["name"] }} - RM {{ item["price"] }}</h5>
+        <p><strong>Seller:</strong> {{ item["seller"] }}</p>
+        <p><strong>Status:</strong> 
+          {% if item["status"] == "pending" %}
+            <span class="badge bg-warning text-dark">Pending</span>
+          {% elif item["status"] == "approved" %}
+            <span class="badge bg-success">Approved</span>
+          {% else %}
+            <span class="badge bg-secondary">{{ item["status"] }}</span>
+          {% endif %}
+        </p>
+        {% if item["status"] == "pending" %}
+          <a href="{{ url_for('approve_item', item_id=id) }}" class="btn btn-success btn-sm me-2">Approve</a>
+          <a href="{{ url_for('reject_item', item_id=id) }}" class="btn btn-danger btn-sm">Reject</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>
