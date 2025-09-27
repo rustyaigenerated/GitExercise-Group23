@@ -83,6 +83,47 @@ def save_orders(orders):
         json.dump(orders, f, indent=4)
 
 
+def load_chats():
+    try:
+        with open("messages.json", "r") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_chats(chats):
+    with open("messages.json", "w") as f:
+        json.dump(chats, f, indent=4)
+
+def create_chat(buyer, seller):
+    chats = load_chats()
+    for cid, chat in chats.items():
+        if chat["buyer"] == buyer and chat["seller"] == seller:
+            return cid  
+    
+    chat_id = str(len(chats) + 1)
+    chats[chat_id] = {
+        "buyer": buyer,
+        "seller": seller,
+        "messages": [],
+        "admin_joined": False
+    }
+    save_chats(chats)
+    return chat_id
+
+def add_chat_message(chat_id, sender, text):
+    chats = load_chats()
+    if chat_id not in chats:
+        return False
+    chats[chat_id]["messages"].append({
+        "sender": sender,
+        "text": text,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    })
+    save_chats(chats)
+    return True
+
+
 
 
 
